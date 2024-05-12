@@ -3,7 +3,7 @@ var cors = require('cors')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express()
-const port = process.env.PORT||3000
+const port = process.env.PORT || 3000
 
 app.use(cors())
 app.use(express.json());
@@ -28,30 +28,56 @@ async function run() {
     const productCollection = database.collection("productInfo");
 
 
-    app.post('/addProducts', async(req, res) => {
+    app.post('/addProducts', async (req, res) => {
       const productsData = req.body;
       const result = await productCollection.insertOne(productsData);
       res.send(result);
     })
 
-    app.get('/getRecent', async(req, res) => {
-      const productsData = productCollection.find().sort({dateTime: -1}).limit(6);
+    app.get('/getRecent', async (req, res) => {
+      const productsData = productCollection.find().sort({ dateTime: -1 }).limit(6);
       const result = await productsData.toArray();
       res.send(result);
     })
 
-    app.get('/getData', async(req, res) => {
+    app.get('/getData', async (req, res) => {
       const email = req.query.email
-      const query = {email: email};
+      const query = { email: email };
       const cursor = productCollection.find(query).sort({ dateTime: -1 });
       const result = await cursor.toArray();
       res.send(result);
     })
 
-    app.get('/myQueries/:id', async(req, res) => {
+    app.get('/myQueries/:id', async (req, res) => {
       const id = req.params.id
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await productCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.put('/update/:id', async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: false };
+      const updateData = req.body;
+      // console.log(updateData);
+      const eachData = {
+        $set: {
+          productName: updateData.productName,
+          productBrand: updateData.productBrand,
+          queryTitle: updateData.queryTitle,
+          imgUrl: updateData.imgUrl,
+          boycottReason: updateData.boycottReason,
+        }
+      }
+      const result = await productCollection.updateOne(filter, eachData, options);
+      res.send(result);
+    })
+
+    app.delete('/delete/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productCollection.deleteOne(query);
       res.send(result);
     })
 
