@@ -100,6 +100,18 @@ async function run() {
       res.send(result);
     })
 
+    app.put('/decrease/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const result = await productCollection.updateOne(
+        filter,
+        { $inc: { recommendationCount: -1 } }, // decrement recommendationCount by 1
+        options
+      );
+      res.send(result);
+    })
+
 
     ///recommendation collection part
     app.post('/addRecommendation', async (req, res) => {
@@ -113,6 +125,20 @@ async function run() {
       const id = req.params.id
       const query = { queryId: id };
       const result = await recommendationCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    app.get(`/myRecommendations`, async (req, res) => {
+      const email = req.query.email
+      const query = { recommendedEmail: email };
+      const result = await recommendationCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    app.delete(`/deleteMyRecommendations/:id`, async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await recommendationCollection.deleteOne(query);
       res.send(result);
     })
 
