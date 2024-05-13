@@ -26,6 +26,7 @@ async function run() {
     await client.connect();
     const database = client.db("productInfoSystem");
     const productCollection = database.collection("productInfo");
+    const recommendationCollection = database.collection("recommendation");
 
 
     app.post('/addProducts', async (req, res) => {
@@ -84,6 +85,27 @@ async function run() {
     app.get('/queries', async (req, res) => {
       const cursor = productCollection.find();
       const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.put('/increaseCount/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const result = await productCollection.updateOne(
+        filter,
+        { $inc: { recommendationCount: 1 } }, // Increment recommendationCount by 1
+        options
+      );
+      res.send(result);
+    })
+
+
+    ///recommendation collection part
+    app.post('/addRecommendation', async (req, res) => {
+      const recommendationData = req.body;
+      // console.log(recommendationData)
+      const result = await recommendationCollection.insertOne(recommendationData);
       res.send(result);
     })
 
