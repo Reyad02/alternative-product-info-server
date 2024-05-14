@@ -41,6 +41,20 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/getRecentQueries', async (req, res) => {
+      const productName = req.query.getRecentQueries;
+      // console.log(productName);
+      let cursor;
+      if (productName && productName.trim() !== "") {
+        const query = { productName: { $regex: productName, $options: 'i' } };
+        cursor = productCollection.find(query);
+      } else {
+        cursor = productCollection.find();
+      }
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
     app.get('/getData', async (req, res) => {
       const email = req.query.email
       const query = { email: email };
