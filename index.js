@@ -30,7 +30,6 @@ const client = new MongoClient(uri, {
 
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
-  console.log("Token in the middleware", token);
   if (!token) {
     return res.status(401).send({ message: "Unauthorized user" })
   }
